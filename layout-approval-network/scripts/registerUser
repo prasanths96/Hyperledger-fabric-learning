@@ -1,0 +1,25 @@
+
+source ./switchToUserIdentity
+source ./init
+
+export ORG=$1
+export USER_NAME=$2
+export USER_PASS=$3	
+
+# Enroll CA Admin first
+	export FABRIC_CA_CLIENT_HOME=$HOME/ca-admins/rca-$ORG
+   	export FABRIC_CA_CLIENT_TLS_CERTFILES=/data/ca-certs/rca-$ORG.pem
+	echo "Trying to enroll CAAdmin"
+   	fabric-ca-client enroll -d -u https://rca-$ORG-admin:adminpw@rca-$ORG:7054
+
+
+	# User with lan.role attribute
+	echo "Trying to register user"
+	fabric-ca-client register -d --id.name $USER_NAME --id.secret $USER_PASS --id.attrs "lan.role=${ORG}:ecert"
+
+	# Enroll and Switch to user identity
+	echo "Initting peer vars"
+	. initPeerVars $ORG 0 ${ORG}MSP /data/ca-certs/rca-$ORG.pem 
+	echo "Trying to switch to user identity"
+	. switchToUserIdentity $ORG /data/ca-certs/rca-$ORG.pem $USER_NAME $USER_PASS rca-$ORG /data/orgmspdirs/$ORG/admin
+

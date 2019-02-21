@@ -1,0 +1,20 @@
+	export ORG=$1
+   	export CA_CHAINFILE=$2
+	export USER_NAME=$3
+	export USER_PASS=$4
+	export CA_HOST=$5
+	export ORG_ADMIN_HOME=$6
+
+	export FABRIC_CA_CLIENT_HOME=/etc/hyperledger/fabric/orgs/$ORG/user
+	mkdir -p /etc/hyperledger/fabric/orgs/$ORG/user
+	export CORE_PEER_MSPCONFIGPATH=$FABRIC_CA_CLIENT_HOME/msp
+
+	export FABRIC_CA_CLIENT_TLS_CERTFILES=$CA_CHAINFILE
+	echo "Trying to enroll as user"
+	fabric-ca-client enroll -d -u https://$USER_NAME:$USER_PASS@$CA_HOST:7054
+
+	# Set up admincerts directory if required	     
+	ACDIR=$CORE_PEER_MSPCONFIGPATH/admincerts
+	mkdir -p $ACDIR
+	cp $ORG_ADMIN_HOME/msp/signcerts/* $ACDIR
+

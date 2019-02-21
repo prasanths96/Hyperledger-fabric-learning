@@ -1,0 +1,23 @@
+<div class="full-body">
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>Login</mat-card-title>
+    </mat-card-header>
+    <form #loginForm="ngForm" class="create-layout-form" (submit)="onLogin(loginForm)">
+      <mat-form-field>
+        <input matInput ngModel name="user" placeholder="Username" required>
+        <mat-error *ngIf="user.invalid">You must enter a valid username.</mat-error>              
+      </mat-form-field>
+      <br>
+      <mat-form-field>
+          <input matInput ngModel name="userpw" placeholder="Password" type="password" required>
+          <mat-error *ngIf="userpw.invalid">You must enter a valid password.</mat-error>          
+      </mat-form-field>
+      <br>
+      <label class="err" *ngIf="loginFail" >Invalid username / pass.</label>
+      <br><br>
+      <button mat-raised-button color="accent">Login</button>
+    </form>
+  </mat-card>
+  <mat-spinner *ngIf="isLoading"></mat-spinner> 
+</div>

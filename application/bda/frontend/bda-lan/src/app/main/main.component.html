@@ -1,0 +1,129 @@
+<div class="full-body">
+  <mat-tab-group color="accent" (selectedTabChange)="tabChanged(createForm, viewForm, historyForm)">
+    <mat-tab label="Create Layout">         
+        <mat-card class="mat-elevation-z10">
+          <form #createForm="ngForm" class="create-layout-form" (submit)="createLayout(createForm)">
+            <mat-form-field>
+              <input matInput ngModel name="id" placeholder="Layout ID" required>
+              <mat-error *ngIf="id.invalid">You must enter a value</mat-error>              
+            </mat-form-field>
+            <br>
+            <mat-form-field>
+                <input matInput ngModel name="address" placeholder="Address" required>
+                <mat-error *ngIf="address.invalid">You must enter a value</mat-error>
+            </mat-form-field>
+            <br>
+            <button mat-raised-button color="accent">Create</button>
+          </form>
+        </mat-card>        
+      <mat-spinner *ngIf="isLoading"></mat-spinner>  
+      <br><br>      
+    </mat-tab>
+  
+    <mat-tab label="Request NOC"> 
+        <mat-card class="mat-elevation-z10">
+          <form #NOCForm="ngForm" class="create-layout-form" (submit)="requestNOC(NOCForm)">
+            <mat-form-field>
+              <input matInput ngModel name="id" placeholder="Layout ID" required>
+              <mat-error *ngIf="id.invalid">You must enter a value</mat-error>              
+            </mat-form-field>
+            <br>
+            <button mat-raised-button color="accent">Request NOC</button>
+          </form>
+        </mat-card>
+        <mat-spinner *ngIf="isLoading"></mat-spinner> 
+        <br><br>
+    </mat-tab>
+
+    <mat-tab label="View Layout"> 
+        <mat-card class="mat-elevation-z10">
+          <form #viewForm="ngForm" class="create-layout-form" (submit)="viewLayout(viewForm)">
+            <mat-form-field >
+              <input matInput ngModel name="id" placeholder="Layout ID" required>
+              <mat-error *ngIf="id.invalid">You must enter a value</mat-error>              
+            </mat-form-field>
+            <br>
+            <div class="view-layout-result">
+            <mat-form-field *ngFor="let i of viewLayoutResult"> 
+              <input matInput name="{{i.key}}" placeholder="{{i.key}}" value="{{i.value}}">      
+            </mat-form-field>
+            <br>
+            </div>
+            
+
+            <button mat-raised-button color="accent">View</button>
+          </form>
+        </mat-card>
+        <mat-spinner *ngIf="isLoading"></mat-spinner> 
+        <br><br>
+    </mat-tab>
+
+    <mat-tab label="Layout History"> 
+        <mat-card class="mat-elevation-z10">
+          <form #historyForm="ngForm" class="create-layout-form" (submit)="getHistory(historyForm)">
+            <mat-form-field>
+              <input matInput ngModel name="id" placeholder="Layout ID">             
+            </mat-form-field>
+            <br>
+            <button mat-raised-button color="accent">Layout History</button>
+          </form>
+        </mat-card>
+        <table *ngIf="historyLoaded" mat-table [dataSource]="dataSource" class="mat-elevation-z10">
+          
+            <ng-container matColumnDef="TxId">
+                <th mat-header-cell *matHeaderCellDef> TxId </th>
+                <td mat-cell *matCellDef="let element"> {{element.TxId}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="Id">
+                <th mat-header-cell *matHeaderCellDef> Id </th>
+                <td mat-cell *matCellDef="let element"> {{element.Id}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="Address">
+                <th mat-header-cell *matHeaderCellDef> Address </th>
+                <td mat-cell *matCellDef="let element"> {{element.Address}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="requestedNOC">
+                <th mat-header-cell *matHeaderCellDef> Requested NOC </th>
+                <td mat-cell *matCellDef="let element"> {{element.requestedNOC}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="FAStatus">
+                <th mat-header-cell *matHeaderCellDef> FA </th>
+                <td mat-cell *matCellDef="let element"> {{element.FAStatus}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="LAStatus">
+                <th mat-header-cell *matHeaderCellDef> LA </th>
+                <td mat-cell *matCellDef="let element"> {{element.LAStatus}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="ApprovalStatus">
+                <th mat-header-cell *matHeaderCellDef> Status </th>
+                <td mat-cell *matCellDef="let element"> {{element.ApprovalStatus}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="TimeStamp">
+                <th mat-header-cell *matHeaderCellDef> TimeStamp </th>
+                <td mat-cell *matCellDef="let element"> {{element.TimeStamp}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="IsDelete">
+                <th mat-header-cell *matHeaderCellDef> Delete Status </th>
+                <td mat-cell *matCellDef="let element"> {{element.IsDelete}} </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+        <div [hidden]="!historyLoaded">
+        <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+        </div>
+        <mat-spinner *ngIf="isLoading"></mat-spinner> 
+        <br><br>
+    </mat-tab>
+  </mat-tab-group>
+
+</div>

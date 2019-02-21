@@ -1,0 +1,37 @@
+.full-body{
+    margin: auto;
+}
+
+.create-layout-form {
+    margin: auto;
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.create-layout-form > * {
+    width: 50%;
+  }
+
+mat-card {
+    width: 75%;
+    margin: auto;
+    margin-top: 1rem;
+}
+
+.center {
+    text-align: center;
+}
+
+.err{
+    color: red;
+    font-size: 14px;
+}
+
+mat-spinner{
+    width: 50%;
+    margin: auto;
+}
+
+mat-card-header{
+    margin: auto;
+}

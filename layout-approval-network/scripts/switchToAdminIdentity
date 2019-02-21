@@ -1,0 +1,4 @@
+  
+      ORG_ADMIN_HOME=$1     
+   export CORE_PEER_MSPCONFIGPATH=$ORG_ADMIN_HOME/msp
+

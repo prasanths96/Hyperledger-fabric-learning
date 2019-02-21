@@ -1,0 +1,21 @@
+@import "~@angular/material/_theming.scss";
+
+@include mat-core();
+
+$primary: mat-palette($mat-indigo);
+$secondary: mat-palette($mat-red);
+
+.spacer {
+    flex: 1 1 auto;
+  }
+.toolbar {
+    text-align: center;
+}
+.toolbar-links {
+    text-decoration: none;
+    color: white;
+}
+.toolbar-links:hover {
+    text-decoration: none;
+    color: mat-color($secondary);
+}

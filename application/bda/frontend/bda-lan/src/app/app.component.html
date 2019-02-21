@@ -1,0 +1,21 @@
+
+<mat-toolbar color="primary">
+  <span class="spacer"></span>
+  <span class="mat-h2">Layout Approval Application</span>
+  <span class="spacer"></span>
+  <span><a class="toolbar-links" routerLink="/" routerLinkActive="mat-accent">
+    <button mat-button class="mat-h4">Log in</button>
+    </a>
+  </span>
+  <span><a class="toolbar-links" routerLinkActive="mat-accent">
+    <button mat-button class="mat-h4" (click)="signOut()">Sign Out</button>
+    </a>
+  </span>
+
+  <!--<p>{{record | async}}</p> -->
+
+</mat-toolbar>
+
+<router-outlet></router-outlet>
+
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">

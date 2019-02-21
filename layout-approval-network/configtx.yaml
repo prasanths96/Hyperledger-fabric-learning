@@ -1,0 +1,87 @@
+
+Organizations:
+
+    - &orderer
+        Name: orderer
+        ID: ordererMSP
+        MSPDir: /data/orgmspdirs/orderer/msp
+
+    - &bda
+        Name: bda
+        ID: bdaMSP
+        MSPDir: /data/orgmspdirs/bda/msp
+        AnchorPeers:
+            - Host: peer0-bda
+              Port: 7051
+
+    - &fa
+        Name: fa
+        ID: faMSP
+        MSPDir: /data/orgmspdirs/fa/msp
+        AnchorPeers:
+            - Host: peer0-fa
+              Port: 7051
+
+    - &la
+        Name: la
+        ID: laMSP
+        MSPDir: /data/orgmspdirs/la/msp
+        AnchorPeers:
+            - Host: peer0-la
+              Port: 7051
+
+
+Orderer: &OrdererDefaults
+    OrdererType: solo
+    Addresses:
+        - orderer0:7050
+    BatchTimeout: 2s
+    BatchSize:
+        MaxMessageCount: 10
+        AbsoluteMaxBytes: 99 MB
+        PreferredMaxBytes: 512 KB
+    Kafka:
+        Brokers:
+            - kafka0:9092
+            - kafka1:9092
+            - kafka2:9092
+            - kafka3:9092
+
+Capabilities:
+    Global: &ChannelCapabilities
+        V1_1: true
+    Orderer: &OrdererCapabilities
+    Application: &ApplicationCapabilities
+        V1_2: true
+
+Application: &ApplicationDefaults
+    Organizations:
+
+
+Profiles:
+
+    lanOrdererGenesis:
+        Orderer:
+            <<: *OrdererDefaults
+            Organizations:
+                - *orderer
+        Consortiums:
+            lanconsortium:
+                Organizations:
+                    - *bda
+                    - *fa
+                    - *la
+            
+
+    ThreeOrgsChannel:
+        Consortium: lanconsortium
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                    - *bda
+                    - *fa
+                    - *la
+
+
+
+

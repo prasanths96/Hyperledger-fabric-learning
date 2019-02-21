@@ -1,0 +1,1 @@
+awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' ~/fabric-demos/HLF-multi-layered-network/layout-approval-network/data/ca-certs/rca-bda.pem >  ~/fabric-demos/HLF-multi-layered-network/layout-approval-network/data/ca-certs/rca-bda.pem

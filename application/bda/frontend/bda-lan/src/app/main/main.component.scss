@@ -1,0 +1,52 @@
+@import "~@angular/material/_theming.scss";
+
+@include mat-core();
+
+$primary: mat-palette($mat-indigo);
+
+.card-bg {
+    background: mat-color($primary);
+    color: white;
+    height: 20px;
+}
+
+.full-body{
+    margin: auto;
+}
+
+.create-layout-form {
+    margin: auto;
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.create-layout-form > * {
+    width: 50%;
+  }
+
+mat-card {
+    width: 75%;
+    margin: auto;
+    margin-top: 1rem;
+}
+
+.view-layout-result {
+    margin: auto;
+    width: 75%;
+}
+
+mat-spinner{
+    width: 50%;
+    margin: auto;
+}
+
+table {
+    width: 95%;
+    margin: auto;
+    margin-top: 1rem;
+}
+mat-paginator {
+    width: 95%;
+    margin: auto;
+    margin-top: 1rem;
+}

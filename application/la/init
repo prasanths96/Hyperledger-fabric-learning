@@ -1,0 +1,11 @@
+## Clean wallet
+rm wallet/* -r
+
+## enrollAdmin
+node enrollAdmin.js
+
+## Register
+node registerUser.js user1 userpw
+
+
+

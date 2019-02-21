@@ -1,0 +1,347 @@
+version: '2'
+
+networks:
+  lan:
+
+services:
+
+  rca-orderer:
+    container_name: rca-orderer
+    image: hyperledger/fabric-ca
+    command: /bin/bash -c '/scripts/root-ca-container.sh'
+    environment:
+      - FABRIC_CA_SERVER_HOME=/etc/hyperledger/fabric-ca
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_CSR_CN=rca-orderer
+      - FABRIC_CA_SERVER_CSR_HOSTS=rca-orderer
+      - FABRIC_CA_SERVER_DEBUG=true
+      - BOOTSTRAP_USER_PASS=rca-orderer-admin:adminpw
+    volumes:
+      - ./data:/data
+      - ./scripts:/scripts
+    networks:
+      - lan
+    ports:
+      - "6054:7054"
+
+  rca-bda:
+    container_name: rca-bda
+    image: hyperledger/fabric-ca
+    command: /bin/bash -c '/scripts/root-ca-bda.sh 2>&1'
+    environment:
+      - FABRIC_CA_SERVER_HOME=/etc/hyperledger/fabric-ca
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_CA_NAME=rca-bda
+      - FABRIC_CA_SERVER_CSR_CN=rca-bda
+      - FABRIC_CA_SERVER_CSR_HOSTS=rca-bda
+      - FABRIC_CA_SERVER_DEBUG=true
+      - BOOTSTRAP_USER_PASS=rca-bda-admin:adminpw
+    volumes:
+      - ./data:/data
+      - ./scripts:/scripts
+    networks:
+      - lan
+    ports:
+      - "7054:7054"
+
+  rca-fa:
+    container_name: rca-fa
+    image: hyperledger/fabric-ca
+    command: /bin/bash -c '/scripts/root-ca-fa.sh'
+    environment:
+      - FABRIC_CA_SERVER_HOME=/etc/hyperledger/fabric-ca
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_CA_NAME=rca-fa
+      - FABRIC_CA_SERVER_CSR_CN=rca-fa
+      - FABRIC_CA_SERVER_CSR_HOSTS=rca-fa
+      - FABRIC_CA_SERVER_DEBUG=true
+      - BOOTSTRAP_USER_PASS=rca-fa-admin:adminpw
+    volumes:
+      - ./data:/data
+      - ./scripts:/scripts
+    networks:
+      - lan
+    ports:
+      - "8054:7054"
+
+  rca-la:
+    container_name: rca-la
+    image: hyperledger/fabric-ca
+    command: /bin/bash -c '/scripts/root-ca-la.sh'
+    environment:
+      - FABRIC_CA_SERVER_HOME=/etc/hyperledger/fabric-ca
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_CA_NAME=rca-la
+      - FABRIC_CA_SERVER_CSR_CN=rca-la
+      - FABRIC_CA_SERVER_CSR_HOSTS=rca-la
+      - FABRIC_CA_SERVER_DEBUG=true
+      - BOOTSTRAP_USER_PASS=rca-la-admin:adminpw
+    volumes:
+      - ./data:/data
+      - ./scripts:/scripts
+    networks:
+      - lan
+    ports:
+      - "9054:7054"
+
+  setup:
+    container_name: setup
+    build:
+      args: 
+        - http_proxy
+        - https_proxy
+      context: .
+      dockerfile: fabric-ca-tools.dockerfile
+    command: /bin/bash -c '/scripts/setup-fabric.sh 2>&1'
+    volumes:
+      - ./scripts:/scripts
+      - ./data:/data
+    networks:
+      - lan
+    depends_on:
+      - rca-orderer
+      - rca-bda
+      - rca-fa
+      - rca-la
+
+  orderer0:
+    container_name: orderer0
+    build:
+      args: 
+        - http_proxy
+        - https_proxy
+      context: .
+      dockerfile: fabric-ca-orderer.dockerfile
+    environment:
+      - FABRIC_CA_CLIENT_HOME=/etc/hyperledger/orderer
+      - FABRIC_CA_CLIENT_TLS_CERTFILES=/data/ca-certs/rca-orderer.pem
+      - ENROLLMENT_URL=https://orderer0:adminpw@rca-orderer:7054
+      - ORDERER_HOME=/etc/hyperledger/orderer
+      - ORDERER_HOST=orderer0
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/data/genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=ordererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/orderer/msp
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/etc/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/etc/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/data/ca-certs/rca-orderer.pem]
+      - ORDERER_GENERAL_TLS_CLIENTAUTHREQUIRED=true
+      - ORDERER_GENERAL_TLS_CLIENTROOTCAS=[/data/ca-certs/rca-orderer.pem]
+      - FABRIC_LOGGING_SPEC=debug
+      - ORG=orderer
+      - ORG_ADMIN_CERT=/data/orgs/org0/msp/admincerts/cert.pem
+      - http_proxy=$http_proxy
+    command: /bin/bash -c '/scripts/start-orderer.sh 2>&1' 
+    volumes:
+      - ./scripts:/scripts
+      - ./data:/data
+    networks:
+      - lan
+    depends_on:
+      - setup
+    ports:
+      - 7050:7050
+
+  peer0-bda:
+    container_name: peer0-bda
+    build:
+      args: 
+        - http_proxy
+        - https_proxy
+      context: .
+      dockerfile: fabric-ca-peer.dockerfile
+    environment:
+      - FABRIC_CA_CLIENT_HOME=/opt/gopath/src/github.com/hyperledger/fabric/peer
+      - FABRIC_CA_CLIENT_TLS_CERTFILES=/data/ca-certs/rca-bda.pem
+      - ENROLLMENT_URL=https://peer0-bda:adminpw@rca-bda:7054
+      - PEER_NAME=peer0-bda
+      - PEER_HOME=/opt/gopath/src/github.com/hyperledger/fabric/peer
+      - PEER_HOST=peer0-bda
+      - PEER_NAME_PASS=peer0-bda:adminpw
+      - CORE_PEER_ID=peer0-bda
+      - CORE_PEER_ADDRESS=peer0-bda:7051
+      - CORE_PEER_LOCALMSPID=bdaMSP
+      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/msp
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_lan
+      - FABRIC_LOGGING_SPEC=DEBUG
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/data/ca-certs/rca-bda.pem
+      - CORE_PEER_TLS_CLIENTAUTHREQUIRED=true
+      - CORE_PEER_TLS_CLIENTROOTCAS_FILES=/data/ca-certs/rca-bda.pem
+
+      - CORE_PEER_TLS_CLIENTCERT_FILE=/data/tls/peer0-bda-client.crt
+      - CORE_PEER_TLS_CLIENTKEY_FILE=/data/tls/peer0-bda-client.key
+
+      - CORE_PEER_GOSSIP_USELEADERELECTION=true
+      - CORE_PEER_GOSSIP_ORGLEADER=false
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0-bda:7051
+      - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
+      - ORG=bda
+      - ORG_ADMIN_CERT=/data/orgmspdirs/bda/msp/admincerts/cert.pem
+      - http_proxy=$http_proxy
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash -c '/scripts/start-peer.sh 2>&1'
+    volumes:
+      - ./scripts:/scripts
+      - ./data:/data
+      - /var/run:/host/var/run
+    networks:
+      - lan
+    depends_on:
+      - setup
+    ports:
+      - 7051:7051
+      - 7053:7053
+
+  peer0-fa:
+    container_name: peer0-fa
+    build:
+      args: 
+        - http_proxy
+        - https_proxy
+      context: .
+      dockerfile: fabric-ca-peer.dockerfile
+    environment:
+      - FABRIC_CA_CLIENT_HOME=/opt/gopath/src/github.com/hyperledger/fabric/peer
+      - FABRIC_CA_CLIENT_TLS_CERTFILES=/data/ca-certs/rca-fa.pem
+      - ENROLLMENT_URL=https://peer0-fa:adminpw@rca-fa:7054
+      - PEER_NAME=peer0-fa
+      - PEER_HOME=/opt/gopath/src/github.com/hyperledger/fabric/peer
+      - PEER_HOST=peer0-fa
+      - PEER_NAME_PASS=peer0-fa:adminpw
+      - CORE_PEER_ID=peer0-fa
+      - CORE_PEER_ADDRESS=peer0-fa:7051
+      - CORE_PEER_LOCALMSPID=faMSP
+      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/msp
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_lan
+      - FABRIC_LOGGING_SPEC=DEBUG
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/data/ca-certs/rca-fa.pem
+      - CORE_PEER_TLS_CLIENTAUTHREQUIRED=true
+      - CORE_PEER_TLS_CLIENTROOTCAS_FILES=/data/ca-certs/rca-fa.pem
+
+      - CORE_PEER_TLS_CLIENTCERT_FILE=/data/tls/peer0-bda-client.crt
+      - CORE_PEER_TLS_CLIENTKEY_FILE=/data/tls/peer0-bda-client.key
+
+      - CORE_PEER_GOSSIP_USELEADERELECTION=true
+      - CORE_PEER_GOSSIP_ORGLEADER=false
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0-fa:7051
+      - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
+      - ORG=fa
+      - ORG_ADMIN_CERT=/data/orgmspdirs/fa/msp/admincerts/cert.pem
+      - http_proxy=$http_proxy
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash -c '/scripts/start-peer.sh'
+    volumes:
+      - ./scripts:/scripts
+      - ./data:/data
+      - /var/run:/host/var/run
+    networks:
+      - lan
+    depends_on:
+      - setup
+    ports:
+      - 8051:7051
+      - 8053:7053
+
+  peer0-la:
+    container_name: peer0-la    
+    build:
+      args: 
+        - http_proxy
+        - https_proxy
+      context: .
+      dockerfile: fabric-ca-peer.dockerfile
+    environment:
+      - FABRIC_CA_CLIENT_HOME=/opt/gopath/src/github.com/hyperledger/fabric/peer
+      - FABRIC_CA_CLIENT_TLS_CERTFILES=/data/ca-certs/rca-la.pem
+      - ENROLLMENT_URL=https://peer0-la:adminpw@rca-la:7054
+      - PEER_NAME=peer0-la
+      - PEER_HOME=/opt/gopath/src/github.com/hyperledger/fabric/peer
+      - PEER_HOST=peer0-la
+      - PEER_NAME_PASS=peer0-la:adminpw
+      - CORE_PEER_ID=peer0-la
+      - CORE_PEER_ADDRESS=peer0-la:7051
+      - CORE_PEER_LOCALMSPID=laMSP
+      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/msp
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_lan
+      - FABRIC_LOGGING_SPEC=DEBUG
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/data/ca-certs/rca-la.pem
+      - CORE_PEER_TLS_CLIENTAUTHREQUIRED=true
+      - CORE_PEER_TLS_CLIENTROOTCAS_FILES=/data/ca-certs/rca-la.pem
+
+      - CORE_PEER_TLS_CLIENTCERT_FILE=/data/tls/peer0-la-client.crt
+      - CORE_PEER_TLS_CLIENTKEY_FILE=/data/tls/peer0-la-client.key
+
+      - CORE_PEER_GOSSIP_USELEADERELECTION=true
+      - CORE_PEER_GOSSIP_ORGLEADER=false
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0-la:7051
+      - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
+      - ORG=la
+      - ORG_ADMIN_CERT=/data/orgmspdirs/la/msp/admincerts/cert.pem
+      - http_proxy=$http_proxy
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash -c '/scripts/start-peer.sh'
+    volumes:
+      - ./scripts:/scripts
+      - ./data:/data
+      - /var/run:/host/var/run
+    networks:
+      - lan
+    depends_on:
+      - setup
+    ports:
+      - 9051:7051
+      - 9053:7053
+
+  cli:
+    container_name: cli
+    build:
+      args: 
+        - http_proxy
+        - https_proxy
+      context: .
+      dockerfile: fabric-ca-tools.dockerfile
+    tty: true
+    stdin_open: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_LOGGING_LEVEL=DEBUG
+      #- CORE_LOGGING_LEVEL=INFO
+      - CORE_PEER_ID=cli
+      - CORE_PEER_ADDRESS=peer0-bda:7051
+      - CORE_PEER_LOCALMSPID=bdaMSP
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/wipro.com/peers/peer0.wipro.com/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/wipro.com/peers/peer0.wipro.com/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/data/ca-certs/rca-bda.pem
+      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/msp
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash 
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./data:/data
+        - ./scripts:/scripts
+        - /home/osgdev/fabric-demos/HLF-multi-layered-network/chaincode:/opt/gopath/src/github.com/hyperledger/chaincode
+    depends_on:
+      - peer0-bda
+      - peer0-fa
+      - peer0-la
+      - orderer0
+
+    networks:
+      - lan
+
