@@ -8,18 +8,18 @@
 
 # Steps to run network:
 	## Modifying docker-composer.yml
-	- Open HLF-multi-layered-network/layout-approval-network/docker-compose.yml
+	- Open ./layout-approval-network/docker-compose.yml
 	- Sroll to bottom:
 		- Find in cli.volumes:
 			- /home/osgdev/fabric-demos/HLF-multi-layered-network/chaincode
 		- replace the above path with:
-			- {Your project path where HLF-multi-layered-network folder is present}/HLF-multi-layered-network/chaincode
+			- {Your project path where this repo folder is present}/chaincode
 
 	- Save and close
 
 	## Running the script:
 	
-	- open terminal inside: HLF-multi-layered-network/layout-approval-network
+	- open terminal inside: ./layout-approval-network
 	- run "./start.sh"
 
 	## CLI container:
@@ -29,9 +29,9 @@
 
 	## Run the script to complete process until instantiating of chaincode:
 
-	- run ". /scripts/cli-script.sh" inside the cli container. (dot)<space> is very important in this command as exports inside the script need to be in the same bash.
+	- run ". /scripts/cli-script.sh" inside the cli container. (dot)<space> is very important in this command as exports env variables inside the script need to be in the same bash. If not, usually a new bash instance will be created for each individual scripts that are inside the master script, thereby losing the exported env variables beforehand.
 
-	## Now, follow the "HLF-multi-layered-network/layout-approval-network/scripts/Mannual-Commands.sh" file
+	## Now, follow the "./layout-approval-network/scripts/Mannual-Commands.sh" file
 
 	## To stop:
 	
