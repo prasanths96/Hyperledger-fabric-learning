@@ -11,7 +11,7 @@
 	- Open ./layout-approval-network/docker-compose.yml
 	- Sroll to bottom:
 		- Find in cli.volumes:
-			- /home/osgdev/fabric-demos/HLF-multi-layered-network/chaincode
+			- <repo path>/chaincode
 		- replace the above path with:
 			- {Your project path where this repo folder is present}/chaincode
 
