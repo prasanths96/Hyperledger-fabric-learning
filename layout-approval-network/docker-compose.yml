@@ -319,7 +319,7 @@ services:
         - /var/run/:/host/var/run/
         - ./data:/data
         - ./scripts:/scripts
-        - /home/osgdev/fabric-demos/HLF-multi-layered-network/chaincode:/opt/gopath/src/github.com/hyperledger/chaincode
+        - <repo path>/chaincode:/opt/gopath/src/github.com/hyperledger/chaincode
     depends_on:
       - peer0-bda
       - peer0-fa
